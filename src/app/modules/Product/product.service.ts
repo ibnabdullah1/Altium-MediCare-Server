@@ -129,12 +129,31 @@ const getSingleProducts = async ({ id }: any) => {
 
   return result;
 };
-const updateProduct = async ({ id }: any) => {
+const updateProduct = async (req: any) => {
+  const files = req.files["productImages"] as IFile[];
+
+  const imageUrls: string[] = req?.body?.images;
+  if (files && files.length > 0) {
+    for (let file of files) {
+      const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+      if (uploadToCloudinary?.secure_url) {
+        imageUrls?.push(uploadToCloudinary?.secure_url);
+      }
+    }
+  }
   const result = await prisma.product.update({
     where: {
-      id: id,
+      id: req.params.id,
     },
-    data: {},
+    data: req.body,
+  });
+  return result;
+};
+const deleteProduct = async (id: any) => {
+  const result = await prisma.product.delete({
+    where: {
+      id,
+    },
   });
   return result;
 };
@@ -145,4 +164,5 @@ export const productServices = {
   vendorAllProducts,
   getSingleProducts,
   updateProduct,
+  deleteProduct,
 };

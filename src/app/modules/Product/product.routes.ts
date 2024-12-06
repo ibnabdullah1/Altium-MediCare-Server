@@ -22,7 +22,16 @@ router.get(
   productControllers.vendorAllProducts
 );
 router.get("/:id", productControllers.getSingleProducts);
-router.put("/:id", productControllers.updateProduct);
+router.delete("/:id", productControllers.deleteProduct);
+router.put(
+  "/:id",
+  fileUploader.upload.fields([{ name: "productImages" }]),
+  auth(UserRole.VENDOR, UserRole.ADMIN),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = productValidation.updateProduct.parse(JSON.parse(req.body.data));
+    return productControllers.updateProduct(req, res, next);
+  }
+);
 router.get("/", productControllers.allProducts);
 
 export const productRoutes = router;
