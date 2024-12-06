@@ -129,10 +129,20 @@ const getSingleProducts = async ({ id }: any) => {
 
   return result;
 };
+const updateProduct = async ({ id }: any) => {
+  const result = await prisma.product.update({
+    where: {
+      id: id,
+    },
+    data: {},
+  });
+  return result;
+};
 
 export const productServices = {
   createProduct,
   allProducts,
   vendorAllProducts,
   getSingleProducts,
+  updateProduct,
 };

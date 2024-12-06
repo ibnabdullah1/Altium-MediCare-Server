@@ -22,6 +22,7 @@ router.get(
   productControllers.vendorAllProducts
 );
 router.get("/:id", productControllers.getSingleProducts);
+router.put("/:id", productControllers.updateProduct);
 router.get("/", productControllers.allProducts);
 
 export const productRoutes = router;

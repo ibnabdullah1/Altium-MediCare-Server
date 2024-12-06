@@ -40,10 +40,20 @@ const getSingleProducts = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateProduct = catchAsync(async (req: Request, res: Response) => {
+  const result = await productServices.updateProduct(req.params);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Product update successfully!",
+    data: result,
+  });
+});
 
 export const productControllers = {
   createProduct,
   allProducts,
   vendorAllProducts,
   getSingleProducts,
+  updateProduct,
 };
