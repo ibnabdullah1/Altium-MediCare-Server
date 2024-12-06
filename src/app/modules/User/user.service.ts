@@ -1,4 +1,4 @@
-import { User, UserStatus } from "@prisma/client";
+import { User } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { Request } from "express";
 import httpStatus from "http-status";
@@ -88,7 +88,6 @@ const getMyProfile = async (user: IAuthUser) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
       email: user?.email,
-      status: UserStatus.ACTIVE,
     },
     select: {
       email: true,
@@ -120,9 +119,39 @@ const getCustomerFollowedShops = async (req: any) => {
   });
   return user?.followedShops;
 };
+const getAllUsers = async (req: any) => {
+  const user = await prisma.user.findMany();
+  return user;
+};
+const updateUserRole = async (req: any) => {
+  const user = await prisma.user.update({
+    where: {
+      id: req?.params?.id,
+    },
+    data: {
+      role: req.body.role,
+    },
+  });
+  return user;
+};
+const updateUserStatus = async (req: any) => {
+  const user = await prisma.user.update({
+    where: {
+      id: req?.params?.id,
+    },
+    data: {
+      isSuspended: req.body.isSuspended,
+      status: req.body.isSuspended ? "BLOCKED" : "ACTIVE",
+    },
+  });
+  return user;
+};
 export const userServices = {
   createUser,
   getMyProfile,
   updateProfile,
   getCustomerFollowedShops,
+  getAllUsers,
+  updateUserRole,
+  updateUserStatus,
 };

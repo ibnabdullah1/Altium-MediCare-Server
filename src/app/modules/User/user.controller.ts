@@ -46,9 +46,39 @@ const getCustomerFollowedShops = catchAsync(
     });
   }
 );
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.getAllUsers(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "All users retrieved successfully!",
+    data: result,
+  });
+});
+const updateUserRole = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.updateUserRole(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "User role update successfully!",
+    data: result,
+  });
+});
+const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.updateUserStatus(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "User status update successfully!",
+    data: result,
+  });
+});
 export const userController = {
   createUser,
   getMyProfile,
   profileUpdate,
   getCustomerFollowedShops,
+  getAllUsers,
+  updateUserRole,
+  updateUserStatus,
 };

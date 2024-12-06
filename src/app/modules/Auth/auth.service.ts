@@ -12,10 +12,15 @@ const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
-      status: UserStatus.ACTIVE,
     },
   });
 
+  // Check if the user is blocked
+  if (userData?.status === UserStatus.BLOCKED) {
+    throw new ApiError(httpStatus.FORBIDDEN, "User is blocked!");
+  }
+
+  // Compare the provided password with the stored hashed password
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.password,
     userData.password
@@ -25,6 +30,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password incorrect!");
   }
 
+  // Generate access and refresh tokens
   const accessToken = jwtHelpers.generateToken(
     {
       name: userData.name,
@@ -45,6 +51,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     config.jwt.refresh_token_expires_in as string
   );
 
+  // Return the generated tokens and the password change requirement
   return {
     accessToken,
     refreshToken,

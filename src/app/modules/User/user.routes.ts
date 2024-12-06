@@ -28,6 +28,17 @@ router.get(
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
   userController.getMyProfile
 );
+router.get("/", auth(UserRole.ADMIN), userController.getAllUsers);
+router.put(
+  "/update-role/:id",
+  auth(UserRole.ADMIN),
+  userController.updateUserRole
+);
+router.put(
+  "/update-status/:id",
+  auth(UserRole.ADMIN),
+  userController.updateUserStatus
+);
 router.get(
   "/customer/followed-shops",
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
