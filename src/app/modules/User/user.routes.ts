@@ -28,5 +28,9 @@ router.get(
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
   userController.getMyProfile
 );
-
+router.get(
+  "/customer/followed-shops",
+  auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
+  userController.getCustomerFollowedShops
+);
 export const userRoutes = router;

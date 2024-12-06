@@ -35,9 +35,20 @@ const profileUpdate = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
+const getCustomerFollowedShops = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await userServices.getCustomerFollowedShops(req);
+    sendResponse(res, {
+      status: httpStatus.OK,
+      success: true,
+      message: "Your following shop retrieved successfully!",
+      data: result,
+    });
+  }
+);
 export const userController = {
   createUser,
   getMyProfile,
   profileUpdate,
+  getCustomerFollowedShops,
 };

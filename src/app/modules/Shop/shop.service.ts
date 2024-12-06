@@ -150,10 +150,10 @@ const toggleFollowShop = async (req: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Failed to toggle follow state");
   }
 };
+
 const updateShop = async (req: any): Promise<Shop> => {
   const file = req?.file as IFile;
   const { shopId } = req?.params;
-  const { name, description, logo } = req?.body;
 
   const isOwner = await prisma.user.findUnique({
     where: { email: req?.user?.email },

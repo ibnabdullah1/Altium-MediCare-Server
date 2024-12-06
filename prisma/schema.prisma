@@ -8,35 +8,37 @@ datasource db {
 }
 
 model User {
-  id                 String     @id @default(uuid())
+  id                 String       @id @default(uuid())
   name               String
-  email              String     @unique
+  email              String       @unique
   password           String
   role               UserRole
   profilePhoto       String?
   shops              Shop[]
-  followedShops      Shop[]     @relation("FollowedShops")
+  followedShops      Shop[]       @relation("FollowedShops")
   reviews            Review[]
+  shopReview         ShopReview[]
   orders             Order[]
-  isSuspended        Boolean    @default(false)
-  needPasswordChange Boolean    @default(true)
-  status             UserStatus @default(ACTIVE)
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  isSuspended        Boolean      @default(false)
+  needPasswordChange Boolean      @default(true)
+  status             UserStatus   @default(ACTIVE)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
   Product            Product[]
 }
 
 model Shop {
-  id          String    @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
   logo        String?
   description String?
-  owner       User      @relation(fields: [ownerId], references: [id])
+  owner       User         @relation(fields: [ownerId], references: [id])
   ownerId     String
   products    Product[]
+  shopReview  ShopReview[]
   orders      Order[]
-  followers   User[]    @relation("FollowedShops")
-  createdAt   DateTime  @default(now())
+  followers   User[]       @relation("FollowedShops")
+  createdAt   DateTime     @default(now())
 }
 
 // Product model represents items in a shop
@@ -111,6 +113,17 @@ model Review {
   createdAt DateTime @default(now())
   user      User?    @relation(fields: [authorId], references: [id])
   authorId  String?
+}
+
+model ShopReview {
+  id        String   @id @default(uuid())
+  content   String
+  rating    Int
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [authorId], references: [id])
+  shop      Shop?    @relation(fields: [shopId], references: [id])
+  authorId  String?
+  shopId    String?
 }
 
 // Enums for role, status, and other constants

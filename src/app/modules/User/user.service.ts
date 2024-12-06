@@ -107,8 +107,22 @@ const getMyProfile = async (user: IAuthUser) => {
   return userInfo;
 };
 
+const getCustomerFollowedShops = async (req: any) => {
+  const user = await prisma.user.findUnique({
+    where: { email: req?.user?.email },
+    select: {
+      followedShops: {
+        include: {
+          products: true,
+        },
+      },
+    },
+  });
+  return user?.followedShops;
+};
 export const userServices = {
   createUser,
   getMyProfile,
   updateProfile,
+  getCustomerFollowedShops,
 };

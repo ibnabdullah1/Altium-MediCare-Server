@@ -18,6 +18,7 @@ router.post(
 );
 router.get("/", auth(UserRole.VENDOR), shopControllers.getAllShops);
 router.get("/profile/:id", shopControllers.getShopProfile);
+
 router.put(
   "/:shopId/follow",
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),

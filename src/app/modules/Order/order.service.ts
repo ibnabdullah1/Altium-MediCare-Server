@@ -145,7 +145,7 @@ const getVendorOrders = async (req: any) => {
   const isOwner = await prisma.user.findUnique({
     where: { email: req?.user.email },
     include: {
-      shops: true, // Include the vendor's shops to get shop ids
+      shops: true,
     },
   });
 
@@ -153,8 +153,7 @@ const getVendorOrders = async (req: any) => {
     throw new Error("Vendor not found");
   }
 
-  const shopIds = isOwner.shops.map((shop: any) => shop.id); // Get the shop IDs for the vendor
-
+  const shopIds = isOwner.shops.map((shop: any) => shop.id);
   // Fetch all orders for the vendor's shops
   const orders = await prisma.order.findMany({
     where: {
@@ -164,7 +163,14 @@ const getVendorOrders = async (req: any) => {
     },
     include: {
       products: true, // Optionally include products related to the orders
-      shop: true, // Optionally include the shop details in the order
+      shop: true,
+      customer: {
+        select: {
+          name: true,
+          email: true,
+          profilePhoto: true,
+        },
+      }, // Optionally include the shop details in the order
     },
     orderBy: {
       createdAt: "desc", // Order by creation date, descending

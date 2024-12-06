@@ -10,5 +10,10 @@ router.post(
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
   PaymentControllers.createPaymentIntent
 );
+router.get(
+  "/vendor/product-translation",
+  auth(UserRole.VENDOR),
+  PaymentControllers.getVendorProductPaymentHistory
+);
 
 export const PaymentRoutes = router;
