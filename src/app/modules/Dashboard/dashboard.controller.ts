@@ -17,7 +17,7 @@ const getVendorStats = catchAsync(async (req, res) => {
   sendResponse(res, {
     status: httpStatus.OK,
     success: true,
-    message: "Vendor stats retrieved successfully",
+    message: result.message,
     data: result,
   });
 });

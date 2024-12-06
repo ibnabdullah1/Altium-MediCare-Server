@@ -81,12 +81,20 @@ const getVendorStats = async (req: any) => {
       },
     });
 
-    // Check if the user is a vendor and has at least one shop
-    if (!isVendor || !isVendor.shops.length) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Vendor or shop not found");
+    if (!isVendor || !isVendor?.shops?.length) {
+      return {
+        isShop: false,
+        message:
+          "It looks like you haven't set up your shop yet. Start by creating your shop to begin selling and managing your products!",
+        totalProducts: 0,
+        totalRevenue: 0,
+        totalOrders: 0,
+        totalReviews: 0,
+        averageRating: 0,
+      };
     }
 
-    const shopIds = isVendor.shops.map((shop) => shop.id); // Get all shop IDs for the vendor
+    const shopIds = isVendor?.shops.map((shop) => shop.id);
 
     // Get the total products across all the vendor's shops
     const totalProducts = await prisma.product.count({
@@ -144,6 +152,8 @@ const getVendorStats = async (req: any) => {
     });
 
     return {
+      isShop: true,
+      message: "Vendor stats retrieved successfully",
       totalProducts,
       totalRevenue: totalRevenue._sum.totalAmount || 0,
       totalOrders,

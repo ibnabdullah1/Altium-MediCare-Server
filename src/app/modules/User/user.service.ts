@@ -92,6 +92,7 @@ const getMyProfile = async (user: IAuthUser) => {
     },
     select: {
       email: true,
+      profilePhoto: true,
       name: true,
       role: true,
       status: true,
