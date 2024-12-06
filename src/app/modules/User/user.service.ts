@@ -1,4 +1,4 @@
-import { User, UserRole, UserStatus } from "@prisma/client";
+import { User, UserStatus } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { Request } from "express";
 import httpStatus from "http-status";
@@ -36,7 +36,7 @@ const createUser = async (req: Request): Promise<User> => {
     name: req.body.user.name,
     email: req.body.user.email,
     password: hashedPassword,
-    role: UserRole.CUSTOMER,
+    role: req.body.user.role,
     profilePhoto: req.body.user.profilePhoto || null,
   };
 
@@ -47,13 +47,54 @@ const createUser = async (req: Request): Promise<User> => {
 
   return result;
 };
+const updateProfile = async (req: any) => {
+  const file = req.file as IFile;
+
+  // Verify if the user exists
+  const isUser = await prisma.user.findUnique({
+    where: { email: req?.user.email },
+  });
+  if (!isUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  let profilePhoto: string | null = isUser.profilePhoto || null;
+
+  if (file) {
+    try {
+      const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+      profilePhoto = uploadToCloudinary?.secure_url ?? isUser.profilePhoto;
+    } catch (error) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "File upload failed"
+      );
+    }
+  }
+
+  // Update user profile
+  const updatedProfile = await prisma.user.update({
+    where: { id: isUser.id },
+    data: { profilePhoto },
+    select: {
+      profilePhoto: true,
+    },
+  });
+
+  return updatedProfile;
+};
+
 const getMyProfile = async (user: IAuthUser) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
       email: user?.email,
       status: UserStatus.ACTIVE,
     },
-    include: {
+    select: {
+      email: true,
+      name: true,
+      role: true,
+      status: true,
       shops: true,
       followedShops: true,
       reviews: true,
@@ -64,7 +105,9 @@ const getMyProfile = async (user: IAuthUser) => {
 
   return userInfo;
 };
+
 export const userServices = {
   createUser,
   getMyProfile,
+  updateProfile,
 };

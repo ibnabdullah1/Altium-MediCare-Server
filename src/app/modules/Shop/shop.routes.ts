@@ -23,5 +23,14 @@ router.put(
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
   shopControllers.toggleFollowShop
 );
+router.put(
+  "/:shopId",
+  fileUploader.upload.single("file"),
+  auth(UserRole.VENDOR),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = shopValidation.updateShop.parse(JSON.parse(req.body.data));
+    return shopControllers.updateShop(req, res, next);
+  }
+);
 
 export const shopRoutes = router;

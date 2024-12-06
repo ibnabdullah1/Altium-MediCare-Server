@@ -1,75 +1,119 @@
-import { Order, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import httpStatus from "http-status";
+import ApiError from "../../errors/ApiError";
 
 const prisma = new PrismaClient();
 
-const createOrder = async (req: any): Promise<Order> => {
+const createOrder = async (req: any) => {
   try {
     const isUserExists = await prisma.user.findUnique({
       where: { email: req?.user?.email },
     });
-    console.log(req?.user?.email);
     if (!isUserExists) {
       throw new Error("User not found");
     }
-    if (isUserExists) {
-      req.body.customerId = isUserExists.id;
-    }
-    const { customerId, shopId, products, totalAmount, payment, address } =
-      req.body;
+    req.body.customerId = isUserExists.id;
+
+    const { customerId, orders } = req.body;
 
     // Validate request payload
-    if (!shopId || !products || !payment || !totalAmount) {
-      throw new Error("Missing required fields");
+    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Missing required fields: orders"
+      );
     }
 
-    const result = await prisma.$transaction(async (transactionClient) => {
-      // Create a payment record
-      const createdPayment = await transactionClient.payment.create({
-        data: {
-          method: payment.method,
-          status: payment.status,
-          transactionId: payment?.transactionId ? payment?.transactionId : null,
-        },
-      });
+    const results = await prisma.$transaction(async (transactionClient) => {
+      const createdOrders = [];
 
-      // Create an order record
-      const createdOrder = await transactionClient.order.create({
-        data: {
-          customerId,
-          shopId,
-          totalAmount,
-          address,
-          paymentId: createdPayment.id,
-          paymentStatus: payment.status,
-          shippingStatus: "PENDING",
-        },
-      });
+      for (const order of orders) {
+        const { shopId, products, totalAmount, payment, address } = order;
 
-      // Add associated products to the order
-      const orderProductsData = products.map((product: any) => ({
-        orderId: createdOrder.id,
-        productId: product.productId,
-        shopId: product.shopId,
-        quantity: product.quantity,
-      }));
+        if (!shopId || !products || !payment || !totalAmount) {
+          throw new Error("Missing required fields in order");
+        }
 
-      await transactionClient.orderProduct.createMany({
-        data: orderProductsData,
-      });
+        // Create a payment record
+        const createdPayment = await transactionClient.payment.create({
+          data: {
+            method: payment.method,
+            status: payment.status,
+            transactionId: payment?.transactionId || null,
+          },
+        });
 
-      return createdOrder;
+        // Create an order record
+        const createdOrder = await transactionClient.order.create({
+          data: {
+            customerId,
+            shopId,
+            totalAmount,
+            address,
+            paymentId: createdPayment.id,
+            paymentStatus: payment.status,
+            shippingStatus: "PENDING",
+          },
+        });
+
+        // Add associated products to the order
+        const orderProductsData = products.map((product: any) => ({
+          orderId: createdOrder.id,
+          productId: product.productId,
+          shopId: product.shopId,
+          quantity: product.quantity,
+        }));
+
+        await transactionClient.orderProduct.createMany({
+          data: orderProductsData,
+        });
+
+        // Update product quantities in inventory in one go to avoid multiple calls
+        const productUpdates = products.map(async (product: any) => {
+          const { productId, quantity } = product;
+
+          // Fetch the current stock of the product
+          const currentProduct = await transactionClient.product.findUnique({
+            where: { id: productId },
+          });
+
+          if (!currentProduct) {
+            throw new Error(`Product with ID ${productId} not found`);
+          }
+
+          if (currentProduct.inventory < quantity) {
+            throw new Error(
+              `Insufficient stock for product ID ${productId}. Available: ${currentProduct.inventory}, Requested: ${quantity}`
+            );
+          }
+
+          // Deduct the ordered quantity from the stock
+          await transactionClient.product.update({
+            where: { id: productId },
+            data: {
+              inventory: currentProduct.inventory - quantity,
+            },
+          });
+        });
+
+        // Wait for all the product stock updates to complete
+        await Promise.all(productUpdates);
+
+        createdOrders.push(createdOrder);
+      }
+
+      return createdOrders;
     });
 
-    console.log("Order created successfully:", result);
-    return result;
+    return results;
   } catch (error) {
-    console.error("Error creating order:", error);
-    throw error;
+    new ApiError(httpStatus.BAD_REQUEST, "Error creating orders");
   } finally {
     await prisma.$disconnect();
   }
 };
-const getAllOrders = async (req: any) => {
+
+const getCustomerOrders = async (req: any) => {
   const isOwner = await prisma.user.findUnique({
     where: { email: req?.user.email },
   });
@@ -81,6 +125,12 @@ const getAllOrders = async (req: any) => {
     include: {
       customer: true,
       payment: true,
+      products: {
+        include: {
+          product: true,
+          order: true,
+        },
+      },
       shop: true,
     },
     orderBy: {
@@ -89,7 +139,61 @@ const getAllOrders = async (req: any) => {
   });
   return orders;
 };
+
+const getVendorOrders = async (req: any) => {
+  // Fetch the user (vendor) based on their email
+  const isOwner = await prisma.user.findUnique({
+    where: { email: req?.user.email },
+    include: {
+      shops: true, // Include the vendor's shops to get shop ids
+    },
+  });
+
+  if (!isOwner) {
+    throw new Error("Vendor not found");
+  }
+
+  const shopIds = isOwner.shops.map((shop: any) => shop.id); // Get the shop IDs for the vendor
+
+  // Fetch all orders for the vendor's shops
+  const orders = await prisma.order.findMany({
+    where: {
+      shopId: {
+        in: shopIds, // Filter by vendor's shop IDs
+      },
+    },
+    include: {
+      products: true, // Optionally include products related to the orders
+      shop: true, // Optionally include the shop details in the order
+    },
+    orderBy: {
+      createdAt: "desc", // Order by creation date, descending
+    },
+  });
+
+  return orders;
+};
+const updateOrderStatus = async ({ orderId, action, status }: any) => {
+  if (action === "PAYMENT") {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentStatus: status,
+      },
+    });
+  } else if (action === "SHIPPING") {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        shippingStatus: status,
+      },
+    });
+  }
+};
+
 export const orderServices = {
   createOrder,
-  getAllOrders,
+  getCustomerOrders,
+  getVendorOrders,
+  updateOrderStatus,
 };

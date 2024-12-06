@@ -150,9 +150,48 @@ const toggleFollowShop = async (req: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Failed to toggle follow state");
   }
 };
+const updateShop = async (req: any): Promise<Shop> => {
+  const file = req?.file as IFile;
+  const { shopId } = req?.params;
+  const { name, description, logo } = req?.body;
+
+  const isOwner = await prisma.user.findUnique({
+    where: { email: req?.user?.email },
+  });
+
+  if (!isOwner) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Owner not found");
+  }
+
+  const shop = await prisma.shop.findUnique({
+    where: { id: shopId },
+  });
+
+  if (!shop) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Shop not found");
+  }
+  console.log(req.body);
+  // Handle file upload if present
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    req.body.logo = uploadToCloudinary?.secure_url;
+  }
+  console.log(req.body);
+
+  // Update the shop
+  const updatedShop = await prisma.shop.update({
+    where: {
+      id: shopId,
+    },
+    data: req?.body,
+  });
+
+  return updatedShop;
+};
 
 export const shopServices = {
   createShop,
+  updateShop,
   getShopProfile,
   getAllShops,
   toggleFollowShop,

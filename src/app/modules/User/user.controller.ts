@@ -17,7 +17,6 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 const getMyProfile = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const user = req.user;
-
     const result = await userServices.getMyProfile(user as IAuthUser);
     sendResponse(res, {
       status: httpStatus.OK,
@@ -27,8 +26,18 @@ const getMyProfile = catchAsync(
     });
   }
 );
+const profileUpdate = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.updateProfile(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Profile update successfully!",
+    data: result,
+  });
+});
 
 export const userController = {
   createUser,
   getMyProfile,
+  profileUpdate,
 };

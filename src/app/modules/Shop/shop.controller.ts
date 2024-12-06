@@ -13,6 +13,15 @@ const createShop = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateShop = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.updateShop(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Shop updated successfully!",
+    data: result,
+  });
+});
 const getAllShops = catchAsync(async (req: Request, res: Response) => {
   const result = await shopServices.getAllShops(req);
   sendResponse(res, {
@@ -43,6 +52,7 @@ const toggleFollowShop = catchAsync(async (req: Request, res: Response) => {
 
 export const shopControllers = {
   createShop,
+  updateShop,
   getShopProfile,
   getAllShops,
   toggleFollowShop,

@@ -69,7 +69,7 @@ model Order {
   customer       User           @relation(fields: [customerId], references: [id])
   customerId     String
   shopId         String
-  totalAmount    Float
+  totalAmount    Int
   address        String?
   products       OrderProduct[]
   paymentStatus  PaymentStatus

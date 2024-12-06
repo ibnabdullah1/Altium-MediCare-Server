@@ -13,7 +13,13 @@ router.post(
 router.get(
   "/",
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
-  OrderControllers.getAllOrders
+  OrderControllers.getCustomerOrders
 );
+router.put(
+  "/update-status/:id",
+  auth(UserRole.VENDOR),
+  OrderControllers.updateOrderStatus
+);
+router.get("/vendor", auth(UserRole.VENDOR), OrderControllers.getVendorOrders);
 
 export const OrderRoutes = router;

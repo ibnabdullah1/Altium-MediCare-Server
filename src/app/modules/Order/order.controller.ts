@@ -12,8 +12,8 @@ const createOrder = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const getAllOrders = catchAsync(async (req, res) => {
-  const result = await orderServices.getAllOrders(req);
+const getCustomerOrders = catchAsync(async (req, res) => {
+  const result = await orderServices.getCustomerOrders(req);
   sendResponse(res, {
     status: httpStatus.OK,
     success: true,
@@ -21,7 +21,28 @@ const getAllOrders = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getVendorOrders = catchAsync(async (req, res) => {
+  const result = await orderServices.getVendorOrders(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "All orders retrieved successfully!",
+    data: result,
+  });
+});
+const updateOrderStatus = catchAsync(async (req, res) => {
+  await orderServices.updateOrderStatus(req.body);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Order status successfully!",
+    data: null,
+  });
+});
+
 export const OrderControllers = {
   createOrder,
-  getAllOrders,
+  getCustomerOrders,
+  getVendorOrders,
+  updateOrderStatus,
 };

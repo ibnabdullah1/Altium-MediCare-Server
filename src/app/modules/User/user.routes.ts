@@ -15,6 +15,14 @@ router.post(
     return userController.createUser(req, res, next);
   }
 );
+router.put(
+  "/update-profile",
+  fileUploader.upload.single("file"),
+  auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),
+  (req: Request, res: Response, next: NextFunction) => {
+    return userController.profileUpdate(req, res, next);
+  }
+);
 router.get(
   "/me",
   auth(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.VENDOR),

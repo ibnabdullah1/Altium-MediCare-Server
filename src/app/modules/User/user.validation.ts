@@ -13,6 +13,9 @@ const createUser = z.object({
         required_error: "Email is required!",
       })
       .email("Invalid email format!"),
+    role: z.string({
+      required_error: "Role is required!",
+    }),
   }),
 });
 
