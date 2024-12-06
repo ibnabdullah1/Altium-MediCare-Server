@@ -21,5 +21,10 @@ router.put(
   OrderControllers.updateOrderStatus
 );
 router.get("/vendor", auth(UserRole.VENDOR), OrderControllers.getVendorOrders);
+router.get(
+  "/shop-list",
+  auth(UserRole.VENDOR, UserRole.ADMIN, UserRole.CUSTOMER),
+  OrderControllers.getCustomerOrderShopList
+);
 
 export const OrderRoutes = router;

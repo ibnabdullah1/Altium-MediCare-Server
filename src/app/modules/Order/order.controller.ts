@@ -39,10 +39,20 @@ const updateOrderStatus = catchAsync(async (req, res) => {
     data: null,
   });
 });
+const getCustomerOrderShopList = catchAsync(async (req, res) => {
+  const result = await orderServices.getCustomerOrderShopList(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Your order shop list successfully!",
+    data: result,
+  });
+});
 
 export const OrderControllers = {
   createOrder,
   getCustomerOrders,
   getVendorOrders,
   updateOrderStatus,
+  getCustomerOrderShopList,
 };

@@ -33,5 +33,15 @@ router.put(
     return shopControllers.updateShop(req, res, next);
   }
 );
+router.post(
+  "/review/create",
+  auth(UserRole.VENDOR, UserRole.ADMIN, UserRole.CUSTOMER),
+  shopControllers.createShopReview
+);
+router.delete(
+  "/:shopId",
+  auth(UserRole.VENDOR, UserRole.ADMIN),
+  shopControllers.deleteShop
+);
 
 export const shopRoutes = router;

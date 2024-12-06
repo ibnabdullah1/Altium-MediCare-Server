@@ -139,6 +139,37 @@ const getCustomerOrders = async (req: any) => {
   });
   return orders;
 };
+const getCustomerOrderShopList = async (req: any) => {
+  const isOwner = await prisma.user.findUnique({
+    where: { email: req?.user?.email },
+  });
+
+  if (!isOwner) {
+    throw new Error("User not found");
+  }
+
+  const shops = await prisma.order.findMany({
+    where: {
+      customerId: isOwner.id,
+    },
+    include: {
+      shop: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const shopList = shops.map((order) => ({
+    level: order.shop?.name || "Unknown Shop",
+    value: order.shop?.id,
+  }));
+  const uniqueShopList = Array.from(
+    new Map(shopList?.map((shop) => [shop.value, shop])).values()
+  );
+
+  return uniqueShopList;
+};
 
 const getVendorOrders = async (req: any) => {
   // Fetch the user (vendor) based on their email
@@ -162,7 +193,7 @@ const getVendorOrders = async (req: any) => {
       },
     },
     include: {
-      products: true, // Optionally include products related to the orders
+      products: true,
       shop: true,
       customer: {
         select: {
@@ -170,15 +201,16 @@ const getVendorOrders = async (req: any) => {
           email: true,
           profilePhoto: true,
         },
-      }, // Optionally include the shop details in the order
+      },
     },
     orderBy: {
-      createdAt: "desc", // Order by creation date, descending
+      createdAt: "desc",
     },
   });
 
   return orders;
 };
+
 const updateOrderStatus = async ({ orderId, action, status }: any) => {
   if (action === "PAYMENT") {
     await prisma.order.update({
@@ -202,4 +234,5 @@ export const orderServices = {
   getCustomerOrders,
   getVendorOrders,
   updateOrderStatus,
+  getCustomerOrderShopList,
 };

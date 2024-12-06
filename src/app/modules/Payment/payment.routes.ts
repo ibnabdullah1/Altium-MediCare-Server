@@ -11,7 +11,7 @@ router.post(
   PaymentControllers.createPaymentIntent
 );
 router.get(
-  "/vendor/product-translation",
+  "/vendor/product-transition",
   auth(UserRole.VENDOR),
   PaymentControllers.getVendorProductPaymentHistory
 );

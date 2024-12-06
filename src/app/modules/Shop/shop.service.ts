@@ -170,13 +170,11 @@ const updateShop = async (req: any): Promise<Shop> => {
   if (!shop) {
     throw new ApiError(httpStatus.NOT_FOUND, "Shop not found");
   }
-  console.log(req.body);
   // Handle file upload if present
   if (file) {
     const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
     req.body.logo = uploadToCloudinary?.secure_url;
   }
-  console.log(req.body);
 
   // Update the shop
   const updatedShop = await prisma.shop.update({
@@ -188,6 +186,42 @@ const updateShop = async (req: any): Promise<Shop> => {
 
   return updatedShop;
 };
+const createShopReview = async (req: any) => {
+  const isUser = await prisma.user.findUnique({
+    where: { email: req?.user.email },
+  });
+  const { rating, shopIds, content } = req.body;
+  if (!isUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (isUser) {
+    req.body.authorId = isUser.id;
+  }
+
+  const reviews = [];
+  for (const shopId of shopIds) {
+    const review = await prisma.shopReview.create({
+      data: {
+        rating,
+        shopId,
+        content,
+        authorId: req.body.authorId,
+      },
+    });
+    reviews.push(review);
+  }
+
+  return reviews;
+};
+
+const deleteShop = async (id: string): Promise<Shop> => {
+  const result = await prisma.shop.delete({
+    where: {
+      id,
+    },
+  });
+  return result;
+};
 
 export const shopServices = {
   createShop,
@@ -195,4 +229,6 @@ export const shopServices = {
   getShopProfile,
   getAllShops,
   toggleFollowShop,
+  createShopReview,
+  deleteShop,
 };

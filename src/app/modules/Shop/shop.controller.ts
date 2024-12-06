@@ -40,6 +40,15 @@ const getShopProfile = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const createShopReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.createShopReview(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Review send successfully!",
+    data: result,
+  });
+});
 const toggleFollowShop = catchAsync(async (req: Request, res: Response) => {
   const result = await shopServices.toggleFollowShop(req);
   sendResponse(res, {
@@ -49,6 +58,15 @@ const toggleFollowShop = catchAsync(async (req: Request, res: Response) => {
     data: "",
   });
 });
+const deleteShop = catchAsync(async (req: Request, res: Response) => {
+  await shopServices.deleteShop(req.params.shopId);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Shop deleted successfully!",
+    data: null,
+  });
+});
 
 export const shopControllers = {
   createShop,
@@ -56,4 +74,6 @@ export const shopControllers = {
   getShopProfile,
   getAllShops,
   toggleFollowShop,
+  createShopReview,
+  deleteShop,
 };
