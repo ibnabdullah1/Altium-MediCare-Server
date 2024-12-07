@@ -15,5 +15,10 @@ router.get(
   auth(UserRole.VENDOR),
   PaymentControllers.getVendorProductPaymentHistory
 );
+router.get(
+  "/product-transition",
+  auth(UserRole.ADMIN),
+  PaymentControllers.getProductPaymentHistory
+);
 
 export const PaymentRoutes = router;

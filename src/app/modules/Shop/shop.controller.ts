@@ -22,8 +22,17 @@ const updateShop = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getVendorAllShops = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.getVendorAllShops(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "All shop retrieved successfully!",
+    data: result,
+  });
+});
 const getAllShops = catchAsync(async (req: Request, res: Response) => {
-  const result = await shopServices.getAllShops(req);
+  const result = await shopServices.getAllShops();
   sendResponse(res, {
     status: httpStatus.OK,
     success: true,
@@ -58,6 +67,15 @@ const toggleFollowShop = catchAsync(async (req: Request, res: Response) => {
     data: "",
   });
 });
+const updateShopStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.updateShopStatus(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Shop status update successfully!",
+    data: result,
+  });
+});
 const deleteShop = catchAsync(async (req: Request, res: Response) => {
   await shopServices.deleteShop(req.params.shopId);
   sendResponse(res, {
@@ -76,4 +94,6 @@ export const shopControllers = {
   toggleFollowShop,
   createShopReview,
   deleteShop,
+  getVendorAllShops,
+  updateShopStatus,
 };

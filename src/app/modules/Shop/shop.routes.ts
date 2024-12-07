@@ -16,7 +16,7 @@ router.post(
     return shopControllers.createShop(req, res, next);
   }
 );
-router.get("/", auth(UserRole.VENDOR), shopControllers.getAllShops);
+router.get("/vendor", auth(UserRole.VENDOR), shopControllers.getVendorAllShops);
 router.get("/profile/:id", shopControllers.getShopProfile);
 
 router.put(
@@ -43,5 +43,10 @@ router.delete(
   auth(UserRole.VENDOR, UserRole.ADMIN),
   shopControllers.deleteShop
 );
-
+router.get("/", auth(UserRole.ADMIN), shopControllers.getAllShops);
+router.put(
+  "/update-status/:id",
+  auth(UserRole.ADMIN),
+  shopControllers.updateShopStatus
+);
 export const shopRoutes = router;

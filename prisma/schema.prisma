@@ -37,6 +37,7 @@ model Shop {
   products    Product[]
   shopReview  ShopReview[]
   orders      Order[]
+  status      ShopStatus   @default(ACTIVE)
   followers   User[]       @relation("FollowedShops")
   createdAt   DateTime     @default(now())
 }
@@ -150,6 +151,12 @@ enum ShippingStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum ShopStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
 }
 
 enum PaymentMethod {

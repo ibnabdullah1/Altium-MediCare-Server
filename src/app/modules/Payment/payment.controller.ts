@@ -24,8 +24,18 @@ const getVendorProductPaymentHistory = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getProductPaymentHistory = catchAsync(async (req, res) => {
+  const result = await PaymentServices.getProductPaymentHistory();
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "Payment retrieved successfully!",
+    data: result,
+  });
+});
 
 export const PaymentControllers = {
   createPaymentIntent,
   getVendorProductPaymentHistory,
+  getProductPaymentHistory,
 };

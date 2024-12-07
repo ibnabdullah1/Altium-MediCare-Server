@@ -33,7 +33,7 @@ const createShop = async (req: any): Promise<Shop> => {
 
   return result;
 };
-const getAllShops = async (req: any) => {
+const getVendorAllShops = async (req: any) => {
   const isOwner = await prisma.user.findUnique({
     where: { email: req?.user.email },
   });
@@ -223,12 +223,46 @@ const deleteShop = async (id: string): Promise<Shop> => {
   return result;
 };
 
+const getAllShops = async () => {
+  const result = await prisma.shop.findMany({
+    include: {
+      _count: {
+        select: {
+          shopReview: true,
+          products: true,
+          orders: true,
+          followers: true,
+        },
+      },
+      owner: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+const updateShopStatus = async (req: any) => {
+  const shop = await prisma.shop.update({
+    where: {
+      id: req?.params?.id,
+    },
+    data: {
+      status: req?.body?.status,
+    },
+  });
+  return shop;
+};
+
 export const shopServices = {
   createShop,
   updateShop,
   getShopProfile,
   getAllShops,
+  getVendorAllShops,
   toggleFollowShop,
   createShopReview,
   deleteShop,
+  updateShopStatus,
 };

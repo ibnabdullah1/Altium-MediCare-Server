@@ -42,8 +42,22 @@ const getVendorProductPaymentHistory = async (req: any) => {
   });
   return shops;
 };
+const getProductPaymentHistory = async () => {
+  const shops = await prisma.order.findMany({
+    include: {
+      payment: true,
+      customer: true,
+      shop: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return shops;
+};
 
 export const PaymentServices = {
   createPaymentIntent,
   getVendorProductPaymentHistory,
+  getProductPaymentHistory,
 };
