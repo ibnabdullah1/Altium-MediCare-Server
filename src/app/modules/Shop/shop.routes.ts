@@ -44,6 +44,12 @@ router.delete(
   shopControllers.deleteShop
 );
 router.get("/", auth(UserRole.ADMIN), shopControllers.getAllShops);
+router.get(
+  "/vendor/review",
+  auth(UserRole.VENDOR),
+  shopControllers.getVendorShopReview
+);
+router.get("/review", auth(UserRole.ADMIN), shopControllers.getShopReview);
 router.put(
   "/update-status/:id",
   auth(UserRole.ADMIN),

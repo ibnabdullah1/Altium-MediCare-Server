@@ -254,7 +254,37 @@ const updateShopStatus = async (req: any) => {
   });
   return shop;
 };
+const getVendorShopReview = async (req: any) => {
+  const isOwner = await prisma.user.findUnique({
+    where: { email: req?.user.email },
+  });
 
+  const shops = await prisma.shop.findMany({
+    where: {
+      ownerId: isOwner?.id,
+    },
+    include: {
+      shopReview: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+  return shops;
+};
+const getShopReview = async (req: any) => {
+  const shops = await prisma.shop.findMany({
+    include: {
+      shopReview: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+  return shops;
+};
 export const shopServices = {
   createShop,
   updateShop,
@@ -263,6 +293,8 @@ export const shopServices = {
   getVendorAllShops,
   toggleFollowShop,
   createShopReview,
+  getVendorShopReview,
   deleteShop,
+  getShopReview,
   updateShopStatus,
 };

@@ -31,6 +31,24 @@ const getVendorAllShops = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getVendorShopReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.getVendorShopReview(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "All shop review retrieved successfully!",
+    data: result,
+  });
+});
+const getShopReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopServices.getShopReview(req);
+  sendResponse(res, {
+    status: httpStatus.OK,
+    success: true,
+    message: "All shop review retrieved successfully!",
+    data: result,
+  });
+});
 const getAllShops = catchAsync(async (req: Request, res: Response) => {
   const result = await shopServices.getAllShops();
   sendResponse(res, {
@@ -96,4 +114,6 @@ export const shopControllers = {
   deleteShop,
   getVendorAllShops,
   updateShopStatus,
+  getVendorShopReview,
+  getShopReview,
 };
