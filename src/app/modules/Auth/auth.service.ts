@@ -139,36 +139,33 @@ const forgotPassword = async (payload: { email: string }) => {
     config.jwt.reset_pass_secret as Secret,
     config.jwt.reset_pass_token_expires_in as string
   );
-  //console.log(resetPassToken)
 
   const resetPassLink =
     config.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`;
-
+  console.log(resetPassLink);
   await emailSender(
     userData.email,
     `
-        <div>
-            <p>Dear User,</p>
-            <p>Your password reset link 
-                <a href=${resetPassLink}>
-                    <button>
-                        Reset Password
-                    </button>
-                </a>
-            </p>
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <p>Dear User,</p>
+    <p>We received a request to reset your password. You can reset your password by clicking the link below:</p>
+    <p style="margin: 20px 0;">
+        <a href="${resetPassLink}" style="color: #007bff; text-decoration: none;">Reset Your Password</a>
+    </p>
+    <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
+    <p>Thank you,</p>
+    <p><strong>The Support Team</strong></p>
+    </div>
 
-        </div>
         `
   );
-  //console.log(resetPassLink)
+  console.log(resetPassLink);
 };
 
 const resetPassword = async (
   token: string,
   payload: { id: string; password: string }
 ) => {
-  console.log({ token, payload });
-
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id: payload.id,
@@ -180,7 +177,7 @@ const resetPassword = async (
     token,
     config.jwt.reset_pass_secret as Secret
   );
-
+  console.log(isValidToken);
   if (!isValidToken) {
     throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");
   }

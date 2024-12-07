@@ -8,7 +8,7 @@ const app: Application = express();
 // CORS middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://altium-medicare.vercel.app"],
     credentials: true,
   })
 );
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
   res.send({
-    Message: "Library Management server..",
+    Message: "Altium Medicare server..",
   });
 });
 
