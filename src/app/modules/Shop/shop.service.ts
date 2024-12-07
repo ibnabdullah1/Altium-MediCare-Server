@@ -264,7 +264,24 @@ const getVendorShopReview = async (req: any) => {
       ownerId: isOwner?.id,
     },
     include: {
+      _count: {
+        select: {
+          shopReview: true,
+          products: true,
+          orders: true,
+          followers: true,
+        },
+      },
       shopReview: {
+        include: {
+          user: {
+            select: {
+              profilePhoto: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
         orderBy: {
           createdAt: "desc",
         },
@@ -276,7 +293,24 @@ const getVendorShopReview = async (req: any) => {
 const getShopReview = async (req: any) => {
   const shops = await prisma.shop.findMany({
     include: {
+      _count: {
+        select: {
+          shopReview: true,
+          products: true,
+          orders: true,
+          followers: true,
+        },
+      },
       shopReview: {
+        include: {
+          user: {
+            select: {
+              profilePhoto: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
         orderBy: {
           createdAt: "desc",
         },
